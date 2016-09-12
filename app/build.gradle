@@ -1,0 +1,131 @@
+apply plugin: 'com.android.application'
+apply plugin: 'com.neenbedankt.android-apt'
+apply plugin: 'me.tatarka.retrolambda'
+
+retrolambda {
+  jvmArgs '-noverify'
+  javaVersion JavaVersion.VERSION_1_6
+  defaultMethods false
+  incremental true
+}
+
+android {
+  compileSdkVersion 24
+  buildToolsVersion '24.0.2'
+
+  defaultConfig {
+    applicationId 'com.serjltt.devfest.weather'
+    testInstrumentationRunner 'com.serjltt.devfest.weather.FunctionalTestRunner'
+
+    minSdkVersion 16
+    targetSdkVersion 24
+    versionCode 1
+    versionName '1.0'
+  }
+
+  compileOptions {
+    sourceCompatibility JavaVersion.VERSION_1_8
+    targetCompatibility JavaVersion.VERSION_1_8
+  }
+
+  packagingOptions {
+    exclude 'META-INF/DEPENDENCIES'
+    exclude 'META-INF/NOTICE'
+    exclude 'META-INF/LICENSE'
+    exclude 'META-INF/LICENSE.txt'
+    exclude 'META-INF/NOTICE.txt'
+    //workaround for bug https://code.google.com/p/android/issues/detail?id=195331
+    exclude 'META-INF/maven/com.google.guava/guava/pom.properties'
+    exclude 'META-INF/maven/com.google.guava/guava/pom.xml'
+  }
+
+  lintOptions {
+    checkReleaseBuilds true
+    abortOnError true
+    textReport true
+    ignoreWarnings true
+    disable 'InvalidPackage'
+  }
+
+  // Make unit tests shine in the terminal
+  testOptions.unitTests.all {
+    testLogging {
+      events 'passed', 'skipped', 'failed', 'standardOut', 'standardError'
+    }
+  }
+}
+
+dependencies {
+  // We need some android support stuff
+  def supportVersion = '24.2.0'
+  compile "com.android.support:support-v4:${supportVersion}"
+  compile "com.android.support:cardview-v7:${supportVersion}"
+  compile "com.android.support:recyclerview-v7:${supportVersion}"
+  compile "com.android.support:appcompat-v7:${supportVersion}"
+
+  compile 'com.github.pedrovgs:renderers:3.0.0'
+
+  // Some DI for code beauty
+  def daggerVersion = '2.6'
+  compile "com.google.dagger:dagger:$daggerVersion"
+  apt "com.google.dagger:dagger-compiler:$daggerVersion"
+  testApt "com.google.dagger:dagger-compiler:$daggerVersion"
+  androidTestApt "com.google.dagger:dagger-compiler:$daggerVersion"
+  provided 'org.glassfish:javax.annotation:10.0-b28'
+
+  // Some butterknife for view binding
+  def butterknifeVersion = '8.4.0'
+  compile "com.jakewharton:butterknife:$butterknifeVersion"
+  apt "com.jakewharton:butterknife-compiler:$butterknifeVersion"
+
+  // Some reactive streams to make kittens happy
+  compile 'io.reactivex:rxjava:1.1.8'
+  compile 'io.reactivex:rxandroid:1.2.1'
+
+  // Some ok libraries
+  def okHttpVersion = '3.4.1'
+  def retrofitVersion = '2.1.0'
+  compile "com.squareup.okhttp3:okhttp:$okHttpVersion"
+  compile "com.squareup.okhttp3:logging-interceptor:$okHttpVersion"
+  compile "com.squareup.retrofit2:retrofit:$retrofitVersion"
+  compile "com.squareup.retrofit2:adapter-rxjava:$retrofitVersion"
+  compile "com.squareup.retrofit2:converter-moshi:$retrofitVersion"
+  compile 'com.squareup.moshi:moshi:1.2.0'
+  compile 'com.squareup.okio:okio:1.9.0'
+  // Normally I wouldn't do it, but the lib in use is not yet published
+  // source code can be found here https://github.com/serj-lotutovici/moshi-lazy-adapters
+  compile fileTree(dir: 'libs', include: ['*.jar'])
+
+  // This version of retrolambda generates less methods
+  retrolambdaConfig 'net.orfjackal.retrolambda:retrolambda:2.3.0'
+
+  // Make unit testing simpler
+  testCompile 'org.robolectric:robolectric:3.1'
+  testCompile 'junit:junit:4.12'
+  testCompile 'org.assertj:assertj-core:3.3.0'
+  testCompile 'org.mockito:mockito-all:1.10.19'
+  testCompile "com.squareup.okhttp3:mockwebserver:$okHttpVersion"
+
+  // Some ui testing libs
+  // Btw, I "love" how espresso and the support tests libs are packaged (why nobody uses 'provide'?)
+
+  def espressoVersion = '2.2.1'
+  def supportTestRunnerVersion = '0.5'
+
+  def uiTestLibs = ["com.android.support.test.espresso:espresso-core:$espressoVersion",
+                    "com.android.support.test.espresso:espresso-contrib:$espressoVersion",
+                    "com.android.support.test:runner:$supportTestRunnerVersion",
+                    "com.android.support.test:rules:$supportTestRunnerVersion"]
+
+  uiTestLibs.each {
+    // 'it' means lib, not the dancing clown :)
+    androidTestCompile dependencies.create(it) {
+      exclude group: 'com.android.support'
+      force = true
+    }
+  }
+
+  // Since the tests are going to be more functional then end to end,
+  // we are going to mock the backend as we do in unit tests.
+  androidTestCompile "com.squareup.okhttp3:mockwebserver:$okHttpVersion"
+}
