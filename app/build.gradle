@@ -94,9 +94,7 @@ dependencies {
   compile "com.squareup.retrofit2:converter-moshi:$retrofitVersion"
   compile 'com.squareup.moshi:moshi:1.2.0'
   compile 'com.squareup.okio:okio:1.9.0'
-  // Normally I wouldn't do it, but the lib in use is not yet published
-  // source code can be found here https://github.com/serj-lotutovici/moshi-lazy-adapters
-  compile fileTree(dir: 'libs', include: ['*.jar'])
+  compile 'com.serjltt.moshi:moshi-lazy-adapters:1.0'
 
   // This version of retrolambda generates less methods
   retrolambdaConfig 'net.orfjackal.retrolambda:retrolambda:2.3.0'
