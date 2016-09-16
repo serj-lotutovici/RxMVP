@@ -13,7 +13,7 @@ import org.hamcrest.TypeSafeMatcher;
 public class RecyclerViewMatcher {
   private final int recyclerViewId;
 
-  public RecyclerViewMatcher(int recyclerViewId) {
+  private RecyclerViewMatcher(int recyclerViewId) {
     this.recyclerViewId = recyclerViewId;
   }
 
@@ -32,11 +32,9 @@ public class RecyclerViewMatcher {
           try {
             idDescription = resources.getResourceName(recyclerViewId);
           } catch (Resources.NotFoundException var4) {
-            idDescription = String.format("%s (resource name not found)",
-                new Object[] {
-                    Integer.valueOf
-                        (recyclerViewId)
-                });
+            idDescription = String.format("%s (resource name not found)", new Object[] {
+                Integer.valueOf(recyclerViewId)
+            });
           }
         }
 

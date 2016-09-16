@@ -44,7 +44,9 @@ android {
     abortOnError true
     textReport true
     ignoreWarnings true
-    disable 'InvalidPackage'
+
+    disable 'GoogleAppIndexingWarning' // App does not have deep linking.
+    disable 'InvalidPackage' // Okio references java.nio that does not presented in Android SDK.
   }
 
   // Make unit tests shine in the terminal
@@ -57,7 +59,7 @@ android {
 
 dependencies {
   // We need some android support stuff
-  def supportVersion = '24.2.0'
+  def supportVersion = '24.2.1'
   compile "com.android.support:support-v4:${supportVersion}"
   compile "com.android.support:cardview-v7:${supportVersion}"
   compile "com.android.support:recyclerview-v7:${supportVersion}"
@@ -109,7 +111,7 @@ dependencies {
   // Some ui testing libs
   // Btw, I "love" how espresso and the support tests libs are packaged (why nobody uses 'provide'?)
 
-  def espressoVersion = '2.2.1'
+  def espressoVersion = '2.2.2'
   def supportTestRunnerVersion = '0.5'
 
   def uiTestLibs = ["com.android.support.test.espresso:espresso-core:$espressoVersion",
