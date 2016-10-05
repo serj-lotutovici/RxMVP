@@ -65,10 +65,15 @@ dependencies {
   compile "com.android.support:recyclerview-v7:${supportVersion}"
   compile "com.android.support:appcompat-v7:${supportVersion}"
 
+  // Some reactive view handling
+  def rxBindingVersion = '0.4.0'
+  compile "com.jakewharton.rxbinding:rxbinding:${rxBindingVersion}"
+  compile "com.jakewharton.rxbinding:rxbinding-appcompat-v7:${rxBindingVersion}"
+
   compile 'com.github.pedrovgs:renderers:3.0.0'
 
   // Some DI for code beauty
-  def daggerVersion = '2.6'
+  def daggerVersion = '2.7'
   compile "com.google.dagger:dagger:$daggerVersion"
   apt "com.google.dagger:dagger-compiler:$daggerVersion"
   testApt "com.google.dagger:dagger-compiler:$daggerVersion"

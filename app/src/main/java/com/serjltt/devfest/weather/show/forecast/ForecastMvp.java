@@ -1,7 +1,7 @@
 package com.serjltt.devfest.weather.show.forecast;
 
 import java.util.List;
-import rx.Subscription;
+import rx.Observable;
 
 /** General contracts for show forecast feature. */
 public interface ForecastMvp {
@@ -14,6 +14,8 @@ public interface ForecastMvp {
   }
 
   interface View {
+    Observable<CharSequence> queryChanged();
+
     void showLoading();
 
     void hideLoading();
@@ -21,9 +23,5 @@ public interface ForecastMvp {
     void showError(String error);
 
     void showForecast(List<Model> data);
-  }
-
-  interface Presenter {
-    Subscription bind(View view);
   }
 }

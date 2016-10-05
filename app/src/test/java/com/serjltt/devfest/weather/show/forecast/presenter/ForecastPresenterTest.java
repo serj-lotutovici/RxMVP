@@ -1,6 +1,7 @@
 package com.serjltt.devfest.weather.show.forecast.presenter;
 
-import com.serjltt.devfest.weather.rx.UseCase;
+import com.serjltt.devfest.weather.mvp.Presenter;
+import com.serjltt.devfest.weather.rx.RxUseCase;
 import com.serjltt.devfest.weather.show.forecast.ForecastMvp;
 import java.io.IOException;
 import java.util.Collections;
@@ -18,9 +19,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public final class ForecastPresenterTest {
-  @Mock UseCase<List<ForecastMvp.Model>> useCase;
+  @Mock RxUseCase<List<ForecastMvp.Model>> useCase;
   @Mock ForecastMvp.View view;
-  ForecastMvp.Presenter presenter;
+  private Presenter<ForecastMvp.View> presenter;
 
   @Before public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
@@ -41,8 +42,8 @@ public final class ForecastPresenterTest {
 
   @Test public void propagatesSuccess() throws Exception {
     ForecastMvp.Model oneForecast = mock(ForecastMvp.Model.class);
-    when(useCase.stream()).thenReturn(Observable.fromCallable(() ->
-        Collections.singletonList(oneForecast)));
+    when(useCase.stream()).thenReturn(
+        Observable.fromCallable(() -> Collections.singletonList(oneForecast)));
 
     presenter.bind(view);
 

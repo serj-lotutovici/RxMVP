@@ -3,7 +3,7 @@ package com.serjltt.devfest.weather.show.forecast.usecase;
 import com.serjltt.devfest.weather.WeatherAppTestRunner;
 import com.serjltt.devfest.weather.di.Consumer;
 import com.serjltt.devfest.weather.di.Injector;
-import com.serjltt.devfest.weather.rx.UseCase;
+import com.serjltt.devfest.weather.rx.RxUseCase;
 import com.serjltt.devfest.weather.show.forecast.ForecastModule;
 import com.serjltt.devfest.weather.show.forecast.ForecastMvp;
 import com.serjltt.devfest.weather.show.forecast.model.ForecastModel;
@@ -22,7 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(WeatherAppTestRunner.class)
 public final class GetForecastUseCaseTest {
-  @Inject UseCase<List<ForecastMvp.Model>> useCase;
+  @Inject RxUseCase<List<ForecastMvp.Model>> useCase;
 
   @Before public void setUp() throws Exception {
     DaggerGetForecastUseCaseTest_TestComponent.builder()
