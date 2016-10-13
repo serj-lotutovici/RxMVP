@@ -2,7 +2,6 @@ package com.serjltt.devfest.weather.show.forecast;
 
 import com.serjltt.devfest.weather.di.Consumer;
 import com.serjltt.devfest.weather.di.Injector;
-import com.serjltt.devfest.weather.show.forecast.presenter.ForecastPresenterTest;
 import com.serjltt.devfest.weather.show.forecast.usecase.GetForecastUseCaseTest;
 import dagger.Component;
 
@@ -15,6 +14,4 @@ import dagger.Component;
     })
 public interface ForecastTestComponent {
   void inject(GetForecastUseCaseTest test);
-
-  void inject(ForecastPresenterTest test);
 }
