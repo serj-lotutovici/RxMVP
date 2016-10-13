@@ -1,6 +1,7 @@
 apply plugin: 'com.android.application'
 apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'me.tatarka.retrolambda'
+apply plugin: 'com.fernandocejas.frodo'
 
 retrolambda {
   jvmArgs '-noverify'
@@ -11,7 +12,7 @@ retrolambda {
 
 android {
   compileSdkVersion 24
-  buildToolsVersion '24.0.2'
+  buildToolsVersion '24.0.3'
 
   defaultConfig {
     applicationId 'com.serjltt.devfest.weather'
@@ -64,11 +65,17 @@ dependencies {
   compile "com.android.support:cardview-v7:${supportVersion}"
   compile "com.android.support:recyclerview-v7:${supportVersion}"
   compile "com.android.support:appcompat-v7:${supportVersion}"
+  compile "com.android.support:design:${supportVersion}"
+
+  // Some reactive view handling
+  def rxBindingVersion = '0.4.0'
+  compile "com.jakewharton.rxbinding:rxbinding:${rxBindingVersion}"
+  compile "com.jakewharton.rxbinding:rxbinding-appcompat-v7:${rxBindingVersion}"
 
   compile 'com.github.pedrovgs:renderers:3.0.0'
 
   // Some DI for code beauty
-  def daggerVersion = '2.6'
+  def daggerVersion = '2.7'
   compile "com.google.dagger:dagger:$daggerVersion"
   apt "com.google.dagger:dagger-compiler:$daggerVersion"
   testApt "com.google.dagger:dagger-compiler:$daggerVersion"
@@ -83,6 +90,7 @@ dependencies {
   // Some reactive streams to make kittens happy
   compile 'io.reactivex:rxjava:1.1.8'
   compile 'io.reactivex:rxandroid:1.2.1'
+  compile 'com.f2prateek.rx.preferences:rx-preferences:1.0.2'
 
   // Some ok libraries
   def okHttpVersion = '3.4.1'

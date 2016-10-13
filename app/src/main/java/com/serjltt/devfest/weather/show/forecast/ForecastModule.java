@@ -1,27 +1,26 @@
 package com.serjltt.devfest.weather.show.forecast;
 
-import com.serjltt.devfest.weather.data.WeatherService;
+import android.content.Context;
+import android.content.SharedPreferences;
+import com.f2prateek.rx.preferences.Preference;
+import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.serjltt.devfest.weather.di.Consumer;
-import com.serjltt.devfest.weather.rx.RxModule;
-import com.serjltt.devfest.weather.rx.UseCase;
-import com.serjltt.devfest.weather.show.forecast.presenter.ForecastPresenter;
-import com.serjltt.devfest.weather.show.forecast.usecase.GetForecastUseCase;
 import dagger.Module;
 import dagger.Provides;
-import java.util.List;
-import javax.inject.Named;
-import rx.Scheduler;
 
+@SuppressWarnings("MethodMayBeStatic")
 @Consumer
 @Module
-public class ForecastModule {
-  @Provides ForecastMvp.Presenter providePresenter(UseCase<List<ForecastMvp.Model>> useCase,
-      @Named(RxModule.IO_SCHEDULER) Scheduler ioScheduler,
-      @Named(RxModule.MAIN_SCHEDULER) Scheduler mainScheduler) {
-    return new ForecastPresenter(useCase, ioScheduler, mainScheduler);
+public final class ForecastModule {
+  @Provides SharedPreferences provideSharedPreferences(Context context) {
+    return context.getSharedPreferences("forecast", Context.MODE_PRIVATE);
   }
 
-  @Provides UseCase<List<ForecastMvp.Model>> provideUseCase(WeatherService service) {
-    return new GetForecastUseCase(service);
+  @Provides RxSharedPreferences provideRxSharedPreferences(SharedPreferences preferences) {
+    return RxSharedPreferences.create(preferences);
+  }
+
+  @Provides Preference<String> provideCityPreference(RxSharedPreferences rxPreferences) {
+    return rxPreferences.getString("city", "amsterdam");
   }
 }

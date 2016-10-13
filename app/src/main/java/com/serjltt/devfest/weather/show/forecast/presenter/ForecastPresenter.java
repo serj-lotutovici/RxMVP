@@ -1,38 +1,49 @@
 package com.serjltt.devfest.weather.show.forecast.presenter;
 
-import com.serjltt.devfest.weather.rx.UseCase;
+import com.fernandocejas.frodo.annotation.RxLogSubscriber;
+import com.serjltt.devfest.weather.mvp.Presenter;
+import com.serjltt.devfest.weather.rx.RxModule;
+import com.serjltt.devfest.weather.rx.RxUseCase;
 import com.serjltt.devfest.weather.show.forecast.ForecastMvp;
 import java.util.List;
+import javax.inject.Inject;
+import javax.inject.Named;
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscription;
 import rx.subscriptions.CompositeSubscription;
 
-public final class ForecastPresenter implements ForecastMvp.Presenter {
-  final UseCase<List<ForecastMvp.Model>> getForecastUseCase;
-  final Scheduler subscribeScheduler;
-  final Scheduler observeScheduler;
+@RxLogSubscriber
+public final class ForecastPresenter implements Presenter<ForecastMvp.View> {
+  private final RxUseCase<List<ForecastMvp.Model>, String> getForecastUseCase;
+  private final Scheduler ioScheduler;
+  private final Scheduler mainThreadScheduler;
 
-  public ForecastPresenter(UseCase<List<ForecastMvp.Model>> getForecastUseCase,
-      Scheduler subscribeScheduler, Scheduler observeScheduler) {
+  @Inject ForecastPresenter(RxUseCase<List<ForecastMvp.Model>, String> getForecastUseCase,
+      @Named(RxModule.IO_SCHEDULER) Scheduler ioScheduler,
+      @Named(RxModule.MAIN_SCHEDULER) Scheduler mainThreadScheduler) {
     this.getForecastUseCase = getForecastUseCase;
-    this.subscribeScheduler = subscribeScheduler;
-    this.observeScheduler = observeScheduler;
+    this.ioScheduler = ioScheduler;
+    this.mainThreadScheduler = mainThreadScheduler;
   }
 
   @Override public Subscription bind(ForecastMvp.View view) {
     CompositeSubscription subscription = new CompositeSubscription();
 
-    Observable<List<ForecastMvp.Model>> forecastObservable = getForecastUseCase.stream()
-        .subscribeOn(subscribeScheduler)
-        .observeOn(observeScheduler)
-        .doOnSubscribe(view::showLoading)
-        .doOnCompleted(view::hideLoading);
+    Observable<String> cityName = view.cityName()
+        .doOnNext(city -> view.showLoading());
 
-    subscription.add(forecastObservable.subscribe(view::showForecast, throwable -> {
-      view.hideLoading();
-      view.showError(throwable.getMessage());
-    }));
+    subscription.add(cityName
+        .subscribe(city -> {
+          subscription.add(getForecastUseCase.stream(city)
+              .subscribeOn(ioScheduler)
+              .observeOn(mainThreadScheduler)
+              .doOnNext(name -> view.hideLoading())
+              .subscribe(view::showForecast, throwable -> {
+                view.hideLoading();
+                view.showError(throwable.getMessage());
+              }));
+        }));
 
     return subscription;
   }
