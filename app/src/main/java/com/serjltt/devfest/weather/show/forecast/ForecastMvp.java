@@ -14,7 +14,7 @@ public interface ForecastMvp {
   }
 
   interface View {
-    Observable<CharSequence> queryChanged();
+    Observable<String> cityName();
 
     void showLoading();
 

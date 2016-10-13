@@ -1,16 +1,26 @@
 package com.serjltt.devfest.weather.show.forecast;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import com.f2prateek.rx.preferences.Preference;
+import com.f2prateek.rx.preferences.RxSharedPreferences;
 import com.serjltt.devfest.weather.di.Consumer;
-import com.serjltt.devfest.weather.mvp.Presenter;
-import com.serjltt.devfest.weather.rx.RxUseCase;
-import com.serjltt.devfest.weather.show.forecast.presenter.ForecastPresenter;
-import com.serjltt.devfest.weather.show.forecast.usecase.GetForecastUseCase;
-import dagger.Binds;
 import dagger.Module;
-import java.util.List;
+import dagger.Provides;
 
-@Consumer @Module public abstract class ForecastModule {
-  @Binds abstract Presenter<ForecastMvp.View> bindPresenter(ForecastPresenter presenter);
+@SuppressWarnings("MethodMayBeStatic")
+@Consumer
+@Module
+public final class ForecastModule {
+  @Provides SharedPreferences provideSharedPreferences(Context context) {
+    return context.getSharedPreferences("forecast", Context.MODE_PRIVATE);
+  }
 
-  @Binds abstract RxUseCase<List<ForecastMvp.Model>> bindUseCase(GetForecastUseCase useCase);
+  @Provides RxSharedPreferences provideRxSharedPreferences(SharedPreferences preferences) {
+    return RxSharedPreferences.create(preferences);
+  }
+
+  @Provides Preference<String> provideCityPreference(RxSharedPreferences rxPreferences) {
+    return rxPreferences.getString("city", "amsterdam");
+  }
 }

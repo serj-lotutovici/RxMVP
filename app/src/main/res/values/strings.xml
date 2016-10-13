@@ -1,4 +1,5 @@
 <resources>
-    <string name="app_name">Weather</string>
-    <string name="city_search">City Search</string>
+  <string name="app_name">Weather</string>
+  <string name="city_search">City Search</string>
+  <string name="screen_name">Weather: %s</string>
 </resources>
