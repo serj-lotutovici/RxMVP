@@ -22,10 +22,11 @@ import com.serjltt.devfest.weather.di.Injector;
 import com.serjltt.devfest.weather.di.InjectorActivity;
 import com.serjltt.devfest.weather.mvp.Presenter;
 import com.serjltt.devfest.weather.show.forecast.ForecastMvp;
+import hu.akarnokd.rxjava.interop.RxJavaInterop;
+import io.reactivex.Observable;
+import io.reactivex.disposables.Disposable;
 import java.util.List;
 import javax.inject.Inject;
-import rx.Observable;
-import rx.Subscription;
 
 public class ForecastActivity extends InjectorActivity implements ForecastMvp.View {
   static final String[] CITIES = { "amsterdam", "hamburg", "barcelona" };
@@ -39,7 +40,7 @@ public class ForecastActivity extends InjectorActivity implements ForecastMvp.Vi
   @Inject Preference<String> cityNamePref;
 
   RVRendererAdapter<ForecastMvp.Model> adapter;
-  Subscription subscription;
+  Disposable disposable;
   Unbinder unbinder;
 
   @Override protected void onInject(Injector injector) {
@@ -62,11 +63,11 @@ public class ForecastActivity extends InjectorActivity implements ForecastMvp.Vi
     recyclerView.setLayoutManager(new LinearLayoutManager(this));
     recyclerView.setAdapter(adapter);
 
-    subscription = presenter.bind(this);
+    disposable = presenter.bind(this);
   }
 
   @Override protected void onDestroy() {
-    subscription.unsubscribe();
+    disposable.dispose();
     unbinder.unbind();
     super.onDestroy();
   }
@@ -92,7 +93,7 @@ public class ForecastActivity extends InjectorActivity implements ForecastMvp.Vi
   }
 
   @Override public Observable<String> cityName() {
-    return cityNamePref.asObservable()
+    return RxJavaInterop.toV2Observable(cityNamePref.asObservable())
         .share();
   }
 

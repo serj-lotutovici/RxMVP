@@ -8,12 +8,12 @@ import com.serjltt.devfest.weather.data.model.Units;
 import com.serjltt.devfest.weather.di.Consumer;
 import com.serjltt.devfest.weather.di.Injector;
 import dagger.Component;
+import io.reactivex.observers.TestObserver;
 import javax.inject.Inject;
 import okhttp3.mockwebserver.MockResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import rx.observers.TestSubscriber;
 
 import static com.serjltt.devfest.weather.TestUtils.fromResource;
 import static com.serjltt.devfest.weather.WeatherAppTestRunner.testApp;
@@ -31,15 +31,21 @@ public final class WeatherServiceTest {
   }
 
   @Test public void serviceReturnsExpectedData() throws Exception {
-    testApp().mockWebServer().enqueue(
-        new MockResponse().setBody(fromResource("yahoo_response.json"))
-    );
+    testApp().mockWebServer()
+        .enqueue(
+            new MockResponse().setBody(fromResource("yahoo_response.json"))
+        );
 
-    TestSubscriber<ForecastPacket> testSubscriber = new TestSubscriber<>();
-    weatherService.getForecast("q", "f", "e").subscribe(testSubscriber);
+    TestObserver<ForecastPacket> testObserver =
+        weatherService.getForecast("q", "f", "e")
+            .test();
+    testApp().testScheduler()
+        .triggerActions();
 
-    testSubscriber.assertNoErrors();
-    ForecastPacket packet = testSubscriber.getOnNextEvents().get(0);
+    ForecastPacket packet =
+        testObserver.assertNoErrors()
+            .values()
+            .get(0);
 
     // Just copy pasting expected values form the file
     assertThat(packet.title).isEqualTo("Yahoo! Weather - Amsterdam, NH, NL");
@@ -49,12 +55,16 @@ public final class WeatherServiceTest {
     assertThat(packet.forecast).hasSize(10);
 
     Forecast expected = new Forecast("30", "01 Aug 2016", "Mon", "69", "55", "Partly Cloudy");
-    assertThat(packet.forecast.get(2).equals(expected)).isTrue();
-    assertThat(packet.forecast.get(2).hashCode()).isEqualTo(expected.hashCode());
+    assertThat(packet.forecast.get(2)
+        .equals(expected)).isTrue();
+    assertThat(packet.forecast.get(2)
+        .hashCode()).isEqualTo(expected.hashCode());
   }
 
   /** Wee need a test component to leverage from all the setup. */
-  @Consumer @Component(dependencies = Injector.class) interface TestComponent {
+  @Consumer
+  @Component(dependencies = Injector.class)
+  interface TestComponent {
     void inject(WeatherServiceTest test);
   }
 }

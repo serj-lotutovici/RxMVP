@@ -6,9 +6,9 @@ import com.serjltt.devfest.weather.di.Injector;
 import com.serjltt.devfest.weather.di.InjectorApp;
 import com.serjltt.devfest.weather.di.PlatformModule;
 import com.serjltt.devfest.weather.rx.RxModule;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.HttpUrl;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 
 /** Main application class, that constructs the "real" di component. */
 public final class WeatherApp extends InjectorApp {

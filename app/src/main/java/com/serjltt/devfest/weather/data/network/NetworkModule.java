@@ -1,12 +1,15 @@
 package com.serjltt.devfest.weather.data.network;
 
 import android.content.Context;
-import com.squareup.moshi.Moshi;
+import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import com.serjltt.devfest.weather.BuildConfig;
 import com.serjltt.devfest.weather.data.model.ModelModule;
 import com.serjltt.devfest.weather.di.Global;
+import com.serjltt.devfest.weather.rx.RxModule;
+import com.squareup.moshi.Moshi;
 import dagger.Module;
 import dagger.Provides;
+import io.reactivex.Scheduler;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 import javax.inject.Named;
@@ -19,9 +22,9 @@ import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.moshi.MoshiConverterFactory;
 
+@SuppressWarnings("MethodMayBeStatic")
 @Global
 @Module(includes = ModelModule.class)
 public class NetworkModule {
@@ -42,8 +45,10 @@ public class NetworkModule {
     this.endpoint = endpoint;
   }
 
-  @Provides Retrofit provideRetrofit(OkHttpClient client, Moshi moshi) {
-    return new Retrofit.Builder().addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+  @Provides Retrofit provideRetrofit(OkHttpClient client, Moshi moshi,
+      @Named(RxModule.IO_SCHEDULER) Scheduler ioScheduler) {
+    return new Retrofit.Builder()
+        .addCallAdapterFactory(RxJava2CallAdapterFactory.createWithScheduler(ioScheduler))
         .addConverterFactory(MoshiConverterFactory.create(moshi))
         .client(client)
         .baseUrl(endpoint)

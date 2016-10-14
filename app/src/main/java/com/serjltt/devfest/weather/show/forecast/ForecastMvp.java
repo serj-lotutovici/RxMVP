@@ -1,7 +1,7 @@
 package com.serjltt.devfest.weather.show.forecast;
 
+import io.reactivex.Observable;
 import java.util.List;
-import rx.Observable;
 
 /** General contracts for show forecast feature. */
 public interface ForecastMvp {

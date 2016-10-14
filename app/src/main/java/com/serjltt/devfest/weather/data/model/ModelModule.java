@@ -6,6 +6,7 @@ import com.serjltt.devfest.weather.di.Global;
 import dagger.Module;
 import dagger.Provides;
 
+@SuppressWarnings("MethodMayBeStatic")
 @Global @Module
 public final class ModelModule {
   @Provides Moshi provideMoshi() {

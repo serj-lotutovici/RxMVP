@@ -3,8 +3,8 @@ package com.serjltt.devfest.weather.rx;
 import com.serjltt.devfest.weather.di.Global;
 import dagger.Module;
 import dagger.Provides;
+import io.reactivex.Scheduler;
 import javax.inject.Named;
-import rx.Scheduler;
 
 @Global
 @Module
