@@ -5,6 +5,7 @@ import com.serjltt.devfest.weather.rx.RxUseCase;
 import com.serjltt.devfest.weather.show.forecast.ForecastMvp;
 import io.reactivex.Observable;
 import io.reactivex.schedulers.TestScheduler;
+import io.reactivex.subjects.BehaviorSubject;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
@@ -13,8 +14,10 @@ import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -24,13 +27,16 @@ public final class ForecastPresenterTest {
   @Mock ForecastMvp.View view;
 
   private TestScheduler testScheduler;
+  private BehaviorSubject<String> subject;
   private Presenter<ForecastMvp.View> presenter;
 
   @Before public void setUp() throws Exception {
-    MockitoAnnotations.initMocks(this);
-    when(view.cityName()).thenReturn(Observable.fromCallable(() -> "test"));
-
     testScheduler = new TestScheduler();
+    subject = BehaviorSubject.create();
+
+    MockitoAnnotations.initMocks(this);
+    when(view.cityName()).thenReturn(subject);
+
     presenter = new ForecastPresenter(useCase, testScheduler, testScheduler);
   }
 
@@ -40,7 +46,7 @@ public final class ForecastPresenterTest {
     }));
 
     presenter.bind(view);
-    testScheduler.triggerActions();
+    triggerEvent("test");
 
     verify(view, times(1)).showLoading();
     verify(view, times(1)).hideLoading();
@@ -53,10 +59,29 @@ public final class ForecastPresenterTest {
         Observable.fromCallable(() -> Collections.singletonList(oneForecast)));
 
     presenter.bind(view);
-    testScheduler.triggerActions();
+    triggerEvent("test1");
+    triggerEvent("test2");
 
-    verify(view, times(1)).showLoading();
-    verify(view, times(1)).hideLoading();
-    verify(view, times(1)).showForecast(Collections.singletonList(oneForecast));
+    verify(view, times(2)).showLoading();
+    verify(view, times(2)).hideLoading();
+    verify(view, times(2)).showForecast(Collections.singletonList(oneForecast));
+  }
+
+  @Test public void doesNotPropagateIfUnsubscribed() throws Exception {
+    when(useCase.stream(anyString())).thenReturn(
+        Observable.fromCallable(Collections::emptyList));
+
+    presenter.bind(view)
+        .dispose();
+    triggerEvent("test1");
+
+    verify(view, never()).showLoading();
+    verify(view, never()).hideLoading();
+    verify(view, never()).showForecast(anyListOf(ForecastMvp.Model.class));
+  }
+
+  private void triggerEvent(String value) {
+    subject.onNext(value);
+    testScheduler.triggerActions();
   }
 }
