@@ -11,7 +11,6 @@ import javax.inject.Named;
 import rx.Observable;
 import rx.Scheduler;
 import rx.Subscription;
-import rx.subscriptions.CompositeSubscription;
 
 @RxLogSubscriber
 public final class ForecastPresenter implements Presenter<ForecastMvp.View> {
@@ -28,23 +27,17 @@ public final class ForecastPresenter implements Presenter<ForecastMvp.View> {
   }
 
   @Override public Subscription bind(ForecastMvp.View view) {
-    CompositeSubscription subscription = new CompositeSubscription();
+    Observable<List<ForecastMvp.Model>> forecastObservable = view.cityName()
+        .doOnNext(city -> view.showLoading())
+        .flatMap(getForecastUseCase::stream)
+        .subscribeOn(ioScheduler)
+        .observeOn(mainThreadScheduler)
+        .doOnNext(name -> view.hideLoading());
 
-    Observable<String> cityName = view.cityName()
-        .doOnNext(city -> view.showLoading());
-
-    subscription.add(cityName
-        .subscribe(city -> {
-          subscription.add(getForecastUseCase.stream(city)
-              .subscribeOn(ioScheduler)
-              .observeOn(mainThreadScheduler)
-              .doOnNext(name -> view.hideLoading())
-              .subscribe(view::showForecast, throwable -> {
-                view.hideLoading();
-                view.showError(throwable.getMessage());
-              }));
-        }));
-
-    return subscription;
+    return forecastObservable
+        .subscribe(view::showForecast, throwable -> {
+          view.hideLoading();
+          view.showError(throwable.getMessage());
+        });
   }
 }

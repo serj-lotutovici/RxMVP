@@ -88,7 +88,7 @@ dependencies {
   apt "com.jakewharton:butterknife-compiler:$butterknifeVersion"
 
   // Some reactive streams to make kittens happy
-  compile 'io.reactivex:rxjava:1.1.8'
+  compile 'io.reactivex:rxjava:1.2.1'
   compile 'io.reactivex:rxandroid:1.2.1'
   compile 'com.f2prateek.rx.preferences:rx-preferences:1.0.2'
 

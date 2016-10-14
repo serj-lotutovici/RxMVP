@@ -38,9 +38,9 @@ public final class GetForecastUseCase implements RxUseCase<List<ForecastMvp.Mode
   @Override public Observable<List<ForecastMvp.Model>> stream(String city) {
     return weatherService.getForecast(querySelect(city), QUERY_FORMAT, QUERY_ENV)
         .toObservable()
-        .map(packet -> packet.forecast)
-        .flatMapIterable(list -> list)
-        .map(MAPPER)
-        .toList();
+        .flatMap(packet -> Observable.just(packet.forecast)
+            .flatMapIterable(list -> list)
+            .map(MAPPER)
+            .toList());
   }
 }
