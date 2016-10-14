@@ -12,9 +12,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import rx.Observable;
 import rx.schedulers.Schedulers;
+import rx.subjects.BehaviorSubject;
 
+import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,12 +26,12 @@ public final class ForecastPresenterTest {
   @Mock RxUseCase<List<ForecastMvp.Model>, String> useCase;
   @Mock ForecastMvp.View view;
 
+  private final BehaviorSubject<String> subject = BehaviorSubject.create();
   private Presenter<ForecastMvp.View> presenter;
 
   @Before public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
-
-    when(view.cityName()).thenReturn(Observable.fromCallable(() -> "test"));
+    when(view.cityName()).thenReturn(subject);
 
     presenter = new ForecastPresenter(useCase, Schedulers.immediate(),
         Schedulers.immediate());
@@ -40,10 +43,11 @@ public final class ForecastPresenterTest {
     }));
 
     presenter.bind(view);
+    subject.onNext("test");
 
-    verify(view, times(1)).showLoading();
-    verify(view, times(1)).hideLoading();
-    verify(view, times(1)).showError("Error");
+    verify(view).showLoading();
+    verify(view).hideLoading();
+    verify(view).showError("Error");
   }
 
   @Test public void propagatesSuccess() throws Exception {
@@ -52,9 +56,24 @@ public final class ForecastPresenterTest {
         Observable.fromCallable(() -> Collections.singletonList(oneForecast)));
 
     presenter.bind(view);
+    subject.onNext("test1");
+    subject.onNext("test2");
 
-    verify(view, times(1)).showLoading();
-    verify(view, times(1)).hideLoading();
-    verify(view, times(1)).showForecast(Collections.singletonList(oneForecast));
+    verify(view, times(2)).showLoading();
+    verify(view, times(2)).hideLoading();
+    verify(view, times(2)).showForecast(Collections.singletonList(oneForecast));
+  }
+
+  @Test public void doesNotPropagateIfUnsubscribed() throws Exception {
+    when(useCase.stream(anyString())).thenReturn(
+        Observable.fromCallable(Collections::emptyList));
+
+    presenter.bind(view)
+        .unsubscribe();
+    subject.onNext("test1");
+
+    verify(view, never()).showLoading();
+    verify(view, never()).hideLoading();
+    verify(view, never()).showForecast(anyListOf(ForecastMvp.Model.class));
   }
 }
