@@ -6,7 +6,6 @@ import com.serjltt.devfest.weather.rx.RxUseCase;
 import com.serjltt.devfest.weather.show.forecast.ForecastMvp;
 import io.reactivex.Observable;
 import io.reactivex.Scheduler;
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import java.util.List;
 import javax.inject.Inject;
@@ -26,8 +25,6 @@ public final class ForecastPresenter implements Presenter<ForecastMvp.View> {
   }
 
   @Override public Disposable bind(ForecastMvp.View view) {
-    CompositeDisposable disposable = new CompositeDisposable();
-
     Observable<List<ForecastMvp.Model>> forecastObservable = view.cityName()
         .doOnNext(city -> view.showLoading())
         .flatMap(getForecastUseCase::stream)
@@ -35,12 +32,10 @@ public final class ForecastPresenter implements Presenter<ForecastMvp.View> {
         .observeOn(mainThreadScheduler)
         .doOnNext(name -> view.hideLoading());
 
-    disposable.add(forecastObservable
-        .subscribe(view::showForecast, throwable -> {
+    return forecastObservable.subscribe(view::showForecast,
+        throwable -> {
           view.hideLoading();
           view.showError(throwable.getMessage());
-        }));
-
-    return disposable;
+        });
   }
 }
